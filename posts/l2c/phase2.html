@@ -9,35 +9,71 @@
 <body>
     <div class="container blog-container">
 
-        <h1>Phase 2 – Networking Basics</h1>
-        <p class="post-meta">April 2026 · LearnToCloud</p>
+        <h1>Phase 2 – Networking Troubleshooting Lab</h1>
+        <p class="post-meta">March 2026 · LearnToCloud</p>
 
         <div class="post-content">
 
             <h2>Overview</h2>
             <p>
-                Started digging into networking fundamentals. Focus was on understanding how traffic actually moves through a network,
-                not just memorising terms.
+                As part of the LearnToCloud course, phase 2 was focused on networking fundamentals, including topics such as
+                the OSI model, TCP/UDP, IP addressing, DNS, protocols, ports, subnetting and more. This section ended with a 
+                capstone lab simulating a real world scenario in which you are to troubleshoot and fix 4 network related tickets
+                ranging from DNS misconfiguration to security vulnerabilties.
             </p>
 
             <h2>What I Learned</h2>
             <ul>
-                <li>Difference between public and private IPs</li>
-                <li>Basic DNS resolution flow</li>
-                <li>How subnets actually segment networks</li>
+                <li>Networking fundamentals and theory</li>
+                <li>Network troubleshooting</li>
+                <li>Configuring networks within Azure</li>
             </ul>
 
-            <h2>Example</h2>
-            <p>Basic Azure CLI command to create a resource group:</p>
+            <h2>The first hurdle: setting up the lab</h2>
+            <p>In order to set up the lab you first need to fork then clone the GitHub repository and then run the setup script
+                which uses terraform to deploy a misconfigured network to your cloud provider subscription, in my case I am using 
+                Azure so to my Azure subscription. Once the repo was cloned to my machine I ran the setup.sh script and ran into my first problem.
+            </p>
 
+            <p>The setup script uses the Azure region <b>"eastus"</b> and the <b>"Standard_B1s"</b> size for the lab VMs, as I am from Australia I
+                decided to change the region to <b>"australiaeast"</b>, I ran the script and was given an error:
+            </p>
+
+            <p>
+                <b><i>"4 vCPUs are needed for this configuration, but only 0 vCPUs (of 4) remain"</i></b>
+            </p>
+
+            <p>
+                I Started scouring the web for answers, from my research I found I had 2 options, try another region with different quotas or request
+                more from Azure, I began trying different configurations of regions and VM sizes, none were working, I tried for over an hour, deploying, 
+                destroying, deploying, destroying, nothing would work. I even copied the configuration from the Phase1 lab that someone had mentioned on
+                the forum as I remember having trouble with a similar issue, nothing still. That's when I scoured the forum again, hoping someone else
+                had encountered a similar issue, and there it was, the perfect configuration:
+            </p>
+
+            <p>
+                <b>Region: </b>"westeurope"
+            </p>
+            <p>
+                <b>Size: </b>"Standard_D2s_v3"
+            </p>
+
+            <p>
+                I ran the script, deployed, and the network was finally up and running.
+            </p>
+
+            <h2>The network diagram</h2>
             <pre><code>
-az group create \
-  --name myResourceGroup \
-  --location australiaeast
+┌───────────────────────────────────────────────────────────────┐
+│                    VNet (10.0.0.0/16)                         │
+│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐   │
+│  │ Public Subnet  │  │ Private Subnet │  │    Database    │   │
+│  │  10.0.1.0/24   │  │  10.0.2.0/24   │  │    Subnet      │   │
+│  │   - Bastion    │  │   - Web App    │  │  10.0.3.0/24   │   │
+│  │   - NAT GW     │  │   - API Server │  │   - Database   │   │
+│  └────────────────┘  └────────────────┘  └────────────────┘   │
+└───────────────────────────────────────────────────────────────┘
             </code></pre>
-
-            <h2>Diagram</h2>
-            <p>Simple representation of a VNet setup:</p>
 
             <img src="https://imgs.search.brave.com/MLKmmkiTSvym1io5gu7NYx5B57vQBR_DQ6OPOKF4Cng/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA2LzM5LzAxLzg2/LzM2MF9GXzYzOTAx/ODY5MV9aeWt5WWhO/MTIyNDI3cVgzNGI1/MWlKeTF3dEFPU0VD/WC5qcGc" alt="network diagram">
 
