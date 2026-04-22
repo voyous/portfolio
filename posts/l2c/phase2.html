@@ -85,7 +85,7 @@
             </p>
 
             <!-- Ticket 1 -->
-            <h2>🎫 INC-4521: API service can't pull external data</h2>
+            <h2>Incident 1: API service can't pull external data</h2>
             <p>
                 This ticket had the following description:
             </p>
@@ -117,83 +117,135 @@
                 As the API server needs to communicate with external resources this rule should not exist, I deleted the rule and the first ticket was solved.
             </p>
 
+            <img src="/assets/network-lab/first-ticket-done.png" alt="first ticket solved">
+
             <!-- Ticket 2 -->
-            <h2>🎫 INC-4522: Service discovery broken</h2>
+            <h2>Incident 2: Service discovery broken</h2>
             <p>
-                Using the network shown in the diagram above, I was provided with 4 tickets containing issues and was tasked to fix them, each task is 
-                explored below.
+                Ticket 2 was related to name resolution, each server should resolve from a given name, api.internal.local, db.internal.local and web.internal.local for the 
+                api, database and web server respectively. 
             </p>
 
-            <h4>How I solved it:</h4>
+            <img src="/assets/network-lab/dns-resolution-failing.png" alt="curl to database showing name resolution failure">
 
             <p>
-                
+                Immediately I assumed there is probably a misconfiguration in the DNS settings within our resource group, I first ran the command in the image above to 
+                confirm there was an error with name resolution. I then checked the <b>DNS zone</b> in our resource group and noticed there were no records present, I 
+                added the below records:
+            </p>
+
+            <img src="/assets/network-lab/dns-settings.png" alt="DNS records set">
+
+            <p>
+                As the DNS zone was under internal.local, addiging the records for <i>web</i> <i>api</i> and <i>db</i> should fix our name resolution issue. I rank the 
+                validation script and noticed it was not resolved. I was confused as the records were now set so what could be wrong? I took at look at our DNS zone again
+                and realised there was no linked VNet, of course the DNS won't work if our VNet doesn't know to use it, I linked the VNet, rank the validation script again
+                and the second ticket was now solved.
+            </p>
+
+            <img src="/assets/network-lab/incident2-done.png" alt="second ticket solved">
+
+            <h4>Notes:</h4>
+
+            <img src="/assets/network-lab/dns-failing-after-update.png" alt="nslookup failing after DNS records set and VNet linked">
+
+            <p>
+                The above nslookup result caused a bit of trouble for me, initially I ran <b>nslookup</b>, <b>dig</b> and <b>dig trace</b> to find where the resolution 
+                was having issues. While the checks did confirm there were issues with the name resolution, I relied on this nslookup command to confirm if my implementations
+                had fixed the issue. After the records had been updated and the VNet linked, the validation script confirmed my implementaion had resolved the issue however
+                the nslookup was still giving the above error.
+            </p>
+
+            <p>
+                Running the <b><i>resolvectl status</i></b> command I was able to see our Azure DNS server was being used however the nslookup command was not working, I did 
+                some digging (pun not intended) and learnt that the '.local' at the end of our server names causes linux to try and resolve the name locally, hence the 
+                <b>127.0.0.53</b> IP, editing the resolv.conf file I was able to resolve this issue even though it was not required for the lab, however a good learning 
+                experience none the less. In future I have learnt best practice is to not use .local in our naming and instead go for something like .internal which would 
+                have no conflicts.
             </p>
 
             <!-- Ticket 3 -->
-            <h2>🎫 INC-4523: Web frontend can't reach backend</h2>
+            <h2>Incident 3: Web frontend can't reach backend</h2>
             <p>
-                Using the network shown in the diagram above, I was provided with 4 tickets containing issues and was tasked to fix them, each task is 
-                explored below.
+                Incident 3 required the web server to be able to reach the api server on port 8080 however it was being blocked. Again checking the NSG inbound rules all 
+                inbound was blocked, I added the below inbound rule:
             </p>
 
-            <h4>How I solved it:</h4>
+            <img src="/assets/network-lab/nsg-rule-allow-8080.png" alt="inbound NSG rule allowing port 8080 connection from web server">
 
             <p>
-                
+                As the only device that should be connecting to port 8080 was the web server, I decided to add the rule to only allow connections from the web server 
+                specifically as this would be best practice security wise for least privilege, with that, the third ticket was complete:
             </p>
+
+            <img src="/assets/network-lab/third-ticket-done.png" alt="inbound NSG rule allowing port 8080 connection from web server">
 
             <!-- Ticket 4 -->
-            <h2>🎫 INC-4524: Security audit findings</h2>
+            <h2>Incident 4: Security audit findings</h2>
             <p>
-                Using the network shown in the diagram above, I was provided with 4 tickets containing issues and was tasked to fix them, each task is 
-                explored below.
+                Ticket 4 was related to a security audit, in this scenario, the security team had completed an audit and had 3 issues flagged I needed to fix, these were
+                mentioned in the ticket description:
             </p>
+            <pre><code>
+                        <li>SSH is accessible from the internet on some hosts (should only be via bastion)</li>
+                        <li>The database is directly accessible from the bastion host on port 5432 — it should only be reachable from the API tier subnet</li>
+                        <li>ICMP is open from anywhere</li>
+            </code></pre>
 
             <h4>How I solved it:</h4>
 
             <p>
-                
+                I first noticed in the NSG for each server there was an <b>allow-ssh</b> inbound rule from <b>any</b>
             </p>
+
+            <img src="/assets/network-lab/ssh-allowed-everywhere.png" alt="SSH rule allowing connection from anywhere">
 
             <p>
-                - remoted into api server
-                - checked api server was running and all fine
-                - outbound rule in api nsg blocking all internet outbound
-                - deleted, ticket 1 done
-
-                - dns lookup failed
-                - checked dns zone in resource group, no records
-                - added records
-                - still failing
-                - checked vnet link
-                - linked vnet
-                - working
-                - ticket 2 done
-
-                - checked nsg for api server 
-                - all inbound blocked
-                - added inbound rule from web server for port 8080
-                - added only from web server for least privilege best practice 
-                - ticket 3 done
-
-                - allowed only ssh from bastion, was open everywhere
-                - deleted imcp ping rule 
-                - denied bastion on db nsg as default rule allows all traffic from vnet
-                - ticket 4 done
+                As this was set to 'any', these hosts could be connected to via SSH from anywhere, I updated the rules to only allow SSH from the bastion server as shown 
+                below and issue 1 was resolved.
             </p>
+
+            <img src="/assets/network-lab/allow-ssh-bastion.png" alt="SSH only allowed from bastion">
+
+            <p>
+                Next I noticed the web server had a rule allowing ICMP from anywhere as shown below, I deleted this rule and issue 2 was resolved.
+            </p>
+
+            <img src="/assets/network-lab/ping-open.png" alt="ICMP allowed from any">
+
+            <p>
+                Lastly the bastion could connect to the DB on port 5432, as the default rules in Azure NSGs are to allow any and all connections from within the VNet, 
+                this allowed the bastion to connect. I set a rule allowing the API subnet to be able to connect to port 5432 and set another rule with a higher prioirty to 
+                block connections from the bastion:
+            </p>
+
+            <img src="/assets/network-lab/deny-bastion-allow-ssh.png" alt="bastion denied connection to port 5432 on DB server">
+
+            <p>
+                Reflecting on this last objective I believe best practice would have been to block all connections and only allow the API tier subnet to connect to port 
+                5432, my implementation worked however could have been done better in terms of security best practices, however with that, all incidents were resolved:
+            </p>
+
+            <img src="/assets/network-lab/all-incidents-done.png" alt="All incidents resolved">
 
             <!-- Conclusion -->
             <h2>Conclusion</h2>
             <p>
-                Spent way too long overthinking CIDR ranges. Realistically just needed to understand the concept,
-                not optimise it like I’m designing AWS for Netflix.
+                This lab was a very fun and hands on way to test my networking knowledge that I had learnt throughout phase 2 and from my experience working in IT. Some 
+                parts felt easier to me than others such as the DNS issue as I have had more experience debugging those sort of issues in the past. Some parts of the lab
+                I could have done better however I am pleased with my performance and learnt alot from this experience.
+            </p>
+            
+            <p>
+                Mostly I used the Azure portal to implement changes as I have not used the Azure portal much and thought it would be a good learning opportunity to get 
+                comfortable with the layout, I may return to this lab in the future to attempt it only implementing any changes using the CLI and potentially writing a 
+                script or too to automate the process. For now I enjoyed my time with this lab and phase and am onto phase 3, python!
             </p>
         </div>
 
         <div class="links">
             <a href="#">Next Post</a>
-            <a href="../../blog.html">Back to Blog</a>
+            <a href="/blog.html">Back to Blog</a>
             <a href="/">Home</a>
         </div>
 
