@@ -211,6 +211,7 @@ code {
 /* TAGS */
 .project-tags {
     margin-bottom: 12px;
+    margin-top: 12px;
 }
 
 .project-tags span {
@@ -223,7 +224,7 @@ code {
     margin-right: 6px;
 }
 
-/* PROJECT LINKS (clickable but on-theme) */
+/* PROJECT LINKS*/
 .project-links {
     display: flex;
     gap: 8px;
