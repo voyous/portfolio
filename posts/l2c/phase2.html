@@ -13,7 +13,7 @@
         <p class="post-meta">March 2026 · LearnToCloud</p>
 
         <div class="post-content">
-
+            <!-- Intro section -->
             <h2>Overview</h2>
             <p>
                 As part of the LearnToCloud course, phase 2 was focused on networking fundamentals, including topics such as
@@ -29,6 +29,7 @@
                 <li>Configuring networks within Azure</li>
             </ul>
 
+            <!-- Getting the lab started -->
             <h2>The first hurdle: setting up the lab</h2>
             <p>In order to set up the lab you first need to fork then clone the GitHub repository and then run the setup script
                 which uses terraform to deploy a misconfigured network to your cloud provider subscription, in my case I am using 
@@ -62,6 +63,7 @@
                 I ran the script, deployed, and the network was finally up and running.
             </p>
 
+            <!-- Lab diagram -->
             <h2>The network diagram</h2>
             <pre><code>
 ┌───────────────────────────────────────────────────────────────┐
@@ -75,21 +77,102 @@
 └───────────────────────────────────────────────────────────────┘
             </code></pre>
 
-            <img src="https://imgs.search.brave.com/MLKmmkiTSvym1io5gu7NYx5B57vQBR_DQ6OPOKF4Cng/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90My5m/dGNkbi5uZXQvanBn/LzA2LzM5LzAxLzg2/LzM2MF9GXzYzOTAx/ODY5MV9aeWt5WWhO/MTIyNDI3cVgzNGI1/MWlKeTF3dEFPU0VD/WC5qcGc" alt="network diagram">
+            <!-- The Task -->
+            <h2>The Task</h2>
+            <p>
+                Using the network shown in the diagram above, I was provided with 4 tickets containing issues and was tasked to fix them, each task is 
+                explored below.
+            </p>
 
-            <h2>What Went Wrong</h2>
+            <!-- Ticket 1 -->
+            <h2>🎫 INC-4521: API service can't pull external data</h2>
+            <p>
+                This ticket had the following description:
+            </p>
+
+            <p>
+                <i>"Our API service that runs on the private subnet stopped being able to fetch data from external APIs this morning. 
+                We didn't change anything on our end. Requests to third-party services just hang and timeout. Internal calls between our services still work fine."</i>
+            </p>
+
+            <h4>How I solved it:</h4>
+
+            <p>
+
+            </p>
+
+            <!-- Ticket 2 -->
+            <h2>🎫 INC-4522: Service discovery broken</h2>
+            <p>
+                Using the network shown in the diagram above, I was provided with 4 tickets containing issues and was tasked to fix them, each task is 
+                explored below.
+            </p>
+
+            <h4>How I solved it:</h4>
+
+            <p>
+                
+            </p>
+
+            <!-- Ticket 3 -->
+            <h2>🎫 INC-4523: Web frontend can't reach backend</h2>
+            <p>
+                Using the network shown in the diagram above, I was provided with 4 tickets containing issues and was tasked to fix them, each task is 
+                explored below.
+            </p>
+
+            <h4>How I solved it:</h4>
+
+            <p>
+                
+            </p>
+
+            <!-- Ticket 4 -->
+            <h2>🎫 INC-4524: Security audit findings</h2>
+            <p>
+                Using the network shown in the diagram above, I was provided with 4 tickets containing issues and was tasked to fix them, each task is 
+                explored below.
+            </p>
+
+            <h4>How I solved it:</h4>
+
+            <p>
+                
+            </p>
+
+            <p>
+                - remoted into api server
+                - checked api server was running and all fine
+                - outbound rule in api nsg blocking all internet outbound
+                - deleted, ticket 1 done
+
+                - dns lookup failed
+                - checked dns zone in resource group, no records
+                - added records
+                - still failing
+                - checked vnet link
+                - linked vnet
+                - working
+                - ticket 2 done
+
+                - checked nsg for api server 
+                - all inbound blocked
+                - added inbound rule from web server for port 8080
+                - added only from web server for least privilege best practice 
+                - ticket 3 done
+
+                - allowed only ssh from bastion, was open everywhere
+                - deleted imcp ping rule 
+                - denied bastion on db nsg as default rule allows all traffic from vnet
+                - ticket 4 done
+            </p>
+
+            <!-- Conclusion -->
+            <h2>Conclusion</h2>
             <p>
                 Spent way too long overthinking CIDR ranges. Realistically just needed to understand the concept,
                 not optimise it like I’m designing AWS for Netflix.
             </p>
-
-            <h2>Next Steps</h2>
-            <ul>
-                <li>Deploy a basic VNet in Azure</li>
-                <li>Connect a VM and test access</li>
-                <li>Write up findings properly</li>
-            </ul>
-
         </div>
 
         <div class="links">
