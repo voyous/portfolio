@@ -98,7 +98,23 @@
             <h4>How I solved it:</h4>
 
             <p>
+                I first SSH'd onto the API server, running a few commands we could confirm the status of the FlaskAPI service that was running on the server.
+            </p>
 
+            <img src="/assets/network-lab/tests-for-API-server-running.png" alt="CLI commands to test API status">
+
+            <p>
+                <b><i>sudo systemctl status api</i></b>
+            </p>
+
+            <p>
+                using the systemctl status command I was able to confirm the api service was running, I then ran the <b>curl</b> command against localhost:8080 where
+                the api service lives to again confirm the api service was healthy. As there was nothing wrong with the api service itself, I next thought this could 
+                be an issue with the firewall blocking traffic. I checked in the outbound rules for the api server's NSG and saw a rule blocking outbound internet traffic.
+            </p>
+
+            <p>
+                As the API server needs to communicate with external resources this rule should not exist, I deleted the rule and the first ticket was solved.
             </p>
 
             <!-- Ticket 2 -->
