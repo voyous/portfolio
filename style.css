@@ -70,7 +70,7 @@ h1 {
 /* BLOG + CONTENT LAYOUT */
 .blog-container {
     text-align: left;
-    max-width: 600px;
+    max-width: 800px;
     margin: 60px auto;
     padding: 0 20px;
 }
@@ -81,8 +81,17 @@ h1 {
 }
 
 /* BLOG LIST */
+.blog-section-container {
+    text-align: center;
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 0 20px;
+}
+
 .blog-section {
+    text-align: justify;
     margin-bottom: 30px;
+    margin-top: 30px;
 }
 
 .blog-section h2 {
